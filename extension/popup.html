@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>X-Lens</title>
+  <style>
+    :root {
+      --desk: #e3e7ea; --glow: #fafcfd; --mount: #c9d1d7;
+      --ink: #1b1f23; --ink-soft: #545e67; --graphite: #2b3035;
+      --coat: #5b3fd6; --coat-green: #2e9e6e; --coat-amber: #d69a2d;
+      --primary-bg: #2b3035; --primary-bg-hover: #15181b; --primary-fg: #fff;
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --desk: #15181b; --glow: #1f2327; --mount: #3a4047; --ink: #e7e9ea; --ink-soft: #9aa4ac; --graphite: #e7e9ea;
+        --primary-bg: #e7e9ea; --primary-bg-hover: #fff; --primary-fg: #15181b; }
+    }
+    * { box-sizing: border-box; }
+    body {
+      width: 280px; margin: 0; padding: 16px;
+      background: var(--desk); color: var(--ink);
+      font: 14px/1.6 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', system-ui, sans-serif;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 18px; font-weight: 700; letter-spacing: 0.02em; }
+    .loupe {
+      width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--graphite);
+      background: conic-gradient(from 200deg, var(--coat), var(--coat-green), var(--coat-amber), var(--coat));
+    }
+    a:focus-visible { outline: 2px solid var(--coat); outline-offset: 2px; }
+
+    .primary {
+      display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px;
+      border-radius: 8px; background: var(--primary-bg); color: var(--primary-fg);
+      font-weight: 700; text-decoration: none; transition: background-color 0.15s;
+    }
+    .primary:hover { background: var(--primary-bg-hover); }
+    .links { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 2px 0; font-size: 12px; }
+    .links a { color: var(--ink-soft); text-decoration: none; }
+    .links a:hover { color: var(--ink); text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <p class="brand"><span class="loupe" aria-hidden="true"></span>X-Lens</p>
+  <a class="primary" href="https://x-lens.workers.dev/" target="_blank" rel="noopener">アプリで開く</a>
+  <nav class="links">
+    <a href="https://x-lens.workers.dev/#/faq" target="_blank" rel="noopener">よくある質問</a>
+    <a href="https://x-lens.workers.dev/#/terms" target="_blank" rel="noopener">利用規約</a>
+    <a href="https://x-lens.workers.dev/#/privacy" target="_blank" rel="noopener">プライバシーポリシー</a>
+  </nav>
+</body>
+</html>

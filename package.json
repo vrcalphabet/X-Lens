@@ -1,0 +1,29 @@
+{
+  "name": "x-lens",
+  "private": true,
+  "version": "1.0.0",
+  "description": "X.com（旧Twitter）に投稿された画像の上に「仮想の虫眼鏡」を重ねると、虫眼鏡越しに**フルカラーの別の画像（裏画像）**が浮かび上がるステガノグラフィー変換＆プレビューシステムです。",
+  "author": "vrcalphabet",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:ext": "vite build --config extension/vite.config.js",
+    "dev:ext": "vite --config extension/vite.config.js"
+  },
+  "dependencies": {
+    "pica": "^10.0.3"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^3.0.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}

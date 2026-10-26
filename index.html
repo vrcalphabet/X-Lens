@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X-Lens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <meta name="theme-color" content="#e3e7ea" />
+</head>
+<body>
+
+  <main id="main" tabindex="-1" class="px-(--gutter) outline-none">
+    <!-- ============ Home ============ -->
+    <section class="screen grid min-h-[calc(100svh-var(--header-h)-4rem)] grid-cols-[minmax(0,5fr)_minmax(0,7fr)] items-center gap-[clamp(1.5rem,5vw,4.5rem)] max-narrow:min-h-0 max-narrow:grid-cols-1 max-narrow:pt-2" data-screen="home">
+      <div>
+        <h1 id="homeTitle" class="mb-7 font-display text-display leading-[1.08] font-normal tracking-[-0.01em]">覗くと、<br />もう一枚。</h1>
+        <p class="mb-8 max-w-[30em] text-md">
+          Xに投稿する画像に、もう一枚の画像を隠せます。<br class="max-narrow:hidden" />
+          レンズを重ねた人にだけ隠された画像が見えます。
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a class="btn btn-primary" href="#/make">画像を隠す</a>
+          <a class="btn btn-quiet" href="#/peek">保存した画像を覗く</a>
+        </div>
+        <!-- TODO(仮): Chrome ウェブストアの公開後、href を拡張機能のページに差し替える -->
+        <a class="ext-link mt-8 flex w-fit max-w-full items-center gap-3 rounded-[0.875rem] bg-glow py-2.5 pr-2.5 pl-3.5 text-ink shadow-[inset_0_0_0_0.0625rem_var(--color-mount)] transition-shadow hover:shadow-[inset_0_0_0_0.125rem_var(--color-graphite)]" href="#/faq">
+          <span class="loupe size-6 flex-none" aria-hidden="true"></span>
+          <span class="min-w-0 text-sm leading-[1.5]">
+            <span class="block font-bold">Chrome拡張機能</span>
+            <span class="block text-xs text-ink-soft">X上でそのまま覗けます</span>
+          </span>
+          <span class="btn btn-primary ml-3 min-h-8 flex-none px-3.5 text-sm">入手する</span>
+        </a>
+      </div>
+      <div class="[--room:12.5rem]">
+        <div class="mount">
+          <div class="lensview" id="homeLens"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Make ============ -->
+    <section class="screen pt-2" data-screen="make">
+      <!-- Step 1 -->
+      <div class="step" data-step="1">
+        <div class="mx-auto grid max-w-[67.5rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-[clamp(0.75rem,3vw,2.5rem)] max-narrow:grid-cols-1">
+          <div class="slot order-1 min-w-0" id="coverSlot">
+            <h2 class="mb-3 text-lg font-bold">表に見せる画像</h2>
+            <label class="slot-drop relative grid aspect-square cursor-pointer place-items-center overflow-hidden rounded-xl bg-glow" for="coverInput">
+              <canvas class="slot-thumb absolute inset-0 size-full" width="480" height="480" hidden></canvas>
+              <span class="slot-empty grid gap-1 text-center text-ink-soft">
+                <strong class="text-md text-ink">画像を選ぶ</strong>
+                <span>またはここにドロップ</span>
+              </span>
+              <input type="file" id="coverInput" accept="image/*" class="sr-only" />
+            </label>
+            <p class="mt-3 truncate text-sm text-ink-soft">タイムラインに表示される画像です</p>
+          </div>
+
+          <div class="slot order-3 min-w-0" id="secretSlot">
+            <h2 class="mb-3 text-lg font-bold">隠す画像</h2>
+            <label class="slot-drop relative grid aspect-square cursor-pointer place-items-center overflow-hidden rounded-xl bg-glow" for="secretInput">
+              <canvas class="slot-thumb absolute inset-0 size-full" width="480" height="480" hidden></canvas>
+              <span class="slot-empty grid gap-1 text-center text-ink-soft">
+                <strong class="text-md text-ink">画像を選ぶ</strong>
+                <span>またはここにドロップ</span>
+              </span>
+              <input type="file" id="secretInput" accept="image/*" class="sr-only" />
+            </label>
+            <p class="mt-3 truncate text-sm text-ink-soft">レンズ越しに見える画像です</p>
+          </div>
+
+          <button type="button" id="swapBtn" title="表と裏を入れ替える" class="order-2 grid size-12 cursor-pointer place-items-center rounded-full bg-glow text-ink shadow-[0_0_0_0.0625rem_var(--color-mount)] hover:shadow-[0_0_0_0.125rem_var(--color-graphite)] max-narrow:justify-self-center max-narrow:rotate-90">
+            <svg viewBox="0 0 24 24" class="size-[1.375rem]" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+
+        <div class="mx-auto mt-6 flex max-w-[67.5rem] flex-wrap items-center justify-center gap-x-4 gap-y-2.5">
+          <span class="text-sm text-ink-soft">手元に画像がなければ、サンプルで試せます</span>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" class="chip" data-sample="fruit">バナナとりんご</button>
+            <button type="button" class="chip" data-sample="human">人物</button>
+            <button type="button" class="chip" data-sample="skytree">スカイツリー</button>
+          </div>
+        </div>
+
+        <div class="sticky bottom-0 z-5 mt-8 flex justify-between gap-3 border-t-[0.0625rem] border-mount bg-desk py-3 shadow-[0_0_0_100vmax_var(--color-desk)] [clip-path:inset(0_-100vmax)]">
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-1 self-center text-sm text-ink-soft max-narrow:hidden">
+            <a class="hover:text-ink hover:underline" href="#/faq">よくある質問</a>
+            <a class="hover:text-ink hover:underline" href="#/terms">利用規約</a>
+            <a class="hover:text-ink hover:underline" href="#/privacy">プライバシーポリシー</a>
+          </div>
+          <a class="btn btn-primary max-narrow:flex-1" id="toStep2" href="#/make" aria-disabled="true">次へ</a>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step" data-step="2">
+        <div class="grid grid-cols-[auto_18.75rem] items-start justify-center gap-10 max-mid:grid-cols-1 mb-8">
+          <div class="tune-stage [--room:9.375rem] max-mid:[--room:18.75rem]">
+            <div class="mount">
+              <div class="lensview" id="makeLens"></div>
+            </div>
+            <span class="field-note inline-block w-full text-center">マウスホイール上下でレンズを拡大・縮小</span>
+          </div>
+
+          <div class="grid gap-6 max-mid:w-full max-mid:max-w-[35rem] max-mid:justify-self-center">
+            <form class="grid gap-7" id="tuneForm">
+              <div>
+                <label class="flex cursor-pointer items-center gap-4">
+                  <strong class="flex-1">比較スライダー</strong>
+                  <input type="checkbox" id="compareToggle" role="switch" class="sr-only" />
+                  <span class="switch-track" aria-hidden="true"></span>
+                </label>
+              </div>
+
+              <fieldset class="min-w-0">
+                <legend class="mb-2.5 flex w-full justify-between font-bold">レンズの大きさ <output id="lensRangeOut" class="font-medium text-ink-soft tabular-nums"></output></legend>
+                <div class="dual">
+                  <div class="dual-fill" id="lensRangeFill"></div>
+                  <input type="range" id="minLens" min="8" max="75" step="1" value="15" />
+                  <input type="range" id="maxLens" min="8" max="75" step="1" value="45" />
+                </div>
+              </fieldset>
+
+              <fieldset class="min-w-0" id="secretFitField" hidden>
+                <legend class="mb-2.5 flex w-full justify-between font-bold">裏の画像の合わせ方</legend>
+                <div class="seg" role="radiogroup">
+                  <label><input type="radio" name="secretFit" value="cover" checked /><span>切り抜く</span></label>
+                  <label><input type="radio" name="secretFit" value="contain" /><span>全体を入れる</span></label>
+                </div>
+                <p class="field-note">「全体を入れる」では裏の画像を中央に置き、余白を背景色で埋めます。</p>
+
+                <div class="mt-4 grid gap-2" id="bgPicker" hidden>
+                  <span class="font-bold">背景色</span>
+                  <div class="flex flex-wrap items-center gap-2.5">
+                    <button type="button" class="swatch is-selected" data-bg="#000000" style="--c: #000000"></button>
+                    <button type="button" class="swatch" data-bg="#ffffff" style="--c: #ffffff"></button>
+                    <button type="button" class="swatch swatch-clamp" data-bg="clamp" title="クランプ（端の色を引き伸ばす）"></button>
+                    <button type="button" class="swatch swatch-blur" data-bg="blur" title="ぼかし（拡大した画像をぼかして敷く）"></button>
+                    <button type="button" class="swatch swatch-custom" id="customSwatch" data-bg="custom" style="--c: #5b3fd6"></button>
+                    <input type="color" id="customColor" value="#5b3fd6" class="sr-only" tabindex="-1" />
+                    <output class="ml-1 text-sm text-ink-soft uppercase tabular-nums" id="bgHex">#000000</output>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset class="min-w-0">
+                <label class="flex cursor-pointer items-center gap-4">
+                  <span class="flex-1">合言葉</span>
+                  <input type="checkbox" id="passwordToggle" role="switch" class="sr-only" />
+                  <span class="switch-track" aria-hidden="true"></span>
+                </label>
+                <div hidden>
+                  <input type="text" id="passwordInput" spellcheck="false" placeholder="なし"
+                    class="w-full rounded-lg bg-white mt-2 px-3.5 py-2.5 shadow-[inset_0_0_0_0.0938rem_var(--color-mount)] outline-none focus-visible:shadow-[inset_0_0_0_0.125rem_var(--color-coat)]" />
+                  <a class="text-sm text-ink-soft underline" href="#" id="generatePassword">合言葉を生成</a>
+                </div>
+                <p class="field-note">合言葉を知っている人だけが隠した画像を見られます。</p>
+              </fieldset>
+
+              <fieldset class="min-w-0">
+                <label class="flex cursor-pointer items-center gap-4">
+                  <span class="flex-1">裏画像のコピーを禁止</span>
+                  <input type="checkbox" id="noCopyToggle" role="switch" class="sr-only" checked />
+                  <span class="switch-track" aria-hidden="true"></span>
+                </label>
+                <p class="field-note">右クリックメニューから裏画像のコピーを禁止します。スクリーンショットまでは防げません。</p>
+              </fieldset>
+            </form>
+
+            <div class="grid gap-2.5 border-t-[0.0625rem] border-mount pt-5">
+              <p class="field-note mt-0 mb-1.5">画像の空き領域に無理やりデータを埋め込んでいるため、隠し画像の画質はわずかに落ちます。</p>
+              <button type="button" class="btn btn-primary btn-large" id="downloadBtn">画像を保存</button>
+              <button type="button" class="btn btn-quiet" id="copyBtn">クリップボードにコピー</button>
+              <a class="mt-1.5 justify-self-start text-sm text-ink-soft underline" href="#/make">画像を選び直す</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Peek ============ -->
+    <section class="screen screen-peek pt-2" data-screen="peek">
+      <div class="mx-auto max-w-[47.5rem]" id="peekEmpty">
+        <label class="peek-drop relative grid min-h-[min(60svh,28.75rem)] cursor-pointer place-items-center content-center gap-1.5 rounded-xl bg-glow text-center text-ink-soft" for="peekInput" id="peekDrop">
+          <span class="loupe mb-3 size-15 [--loupe-rim:0.3125rem] [--loupe-shade:0.5rem]" aria-hidden="true"></span>
+          <strong class="text-lg text-ink">画像を選ぶか、ここにドロップ</strong>
+          <span>コピーした画像は Ctrl+V で貼り付けられます</span>
+          <input type="file" id="peekInput" accept="image/png,image/jpeg,image/webp" class="sr-only" />
+        </label>
+        <p class="mt-5 text-sm text-ink-soft">
+          Xから持ってくる場合は、ポストの画像をクリックして大きく表示し、右クリック →「画像をコピー」してください。<br />
+          拡張機能をすでに入れている場合は、画像を右クリックして「拡大画像をコピー」を押すとコピーできます。<br />
+          タイムラインに表示される縮小された画像からは読み取れません。
+        </p>
+      </div>
+
+      <div class="peek-view mx-auto mt-2 w-fit max-w-full [--room:13.75rem] max-narrow:w-auto" id="peekView" hidden>
+        <div class="mb-3 flex w-0 min-w-full flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <span class="status-chip" data-mode="lsb">隠した画像が見つかりました</span>
+          <label class="btn btn-quiet min-h-9 px-3.5 text-sm" for="peekInput2">
+            別の画像を開く
+            <input type="file" id="peekInput2" accept="image/png,image/jpeg,image/webp" class="sr-only" />
+          </label>
+        </div>
+        <div class="mount">
+          <div class="lensview" id="peekLens"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Terms ============ -->
+    <section class="screen legal mx-auto max-w-[45rem] pt-2 pb-16" data-screen="terms">
+      <p>この利用規約（以下「本規約」）は、vrcalphabet（以下「運営者」）が提供する「X-Lens」の利用条件を定めるものです。X-Lensは、Webアプリ（https://x-lens.workers.dev/）とChrome拡張機能からなります（以下、あわせて「本ツール」）。</p>
+      <p>本ツールは非公式のツールです。X Corp.が提供・承認・支援するものではなく、X Corp.とは一切関係ありません。「X」は X Corp. の商標です。</p>
+
+      <h2>第1条（適用）</h2>
+      <ol>
+        <li>本規約は、本ツールを利用するすべての方（以下「利用者」）に適用されます。</li>
+        <li>利用者は、本ツールを利用した時点で、本規約に同意したものとみなされます。</li>
+        <li>本ツールをXで使うときは、本規約に加えて、Xの利用規約・ルールとポリシーも守ってください。</li>
+      </ol>
+
+      <h2>第2条（利用条件）</h2>
+      <ol>
+        <li>本ツールを利用できるのは、13歳以上の方です。</li>
+        <li>未成年の方は、保護者の同意を得てから利用してください。</li>
+        <li>成人向けの画像を作ったり見たりできるのは、お住まいの国・地域の法律でそれが許されている年齢に達した方だけです（日本では18歳以上）。</li>
+      </ol>
+
+      <h2>第3条（本ツールの内容）</h2>
+      <ol>
+        <li>本ツールは、画像（以下「表画像」）に別の画像（以下「裏画像」）を埋め込み、仮想のレンズを通して裏画像を見られるようにするツールです。</li>
+        <li>本ツールは、ネタバレの隠し場所やクイズの答えなど、覗いた人だけが見つけられる画像の見せ方を楽しむためのツールです。主な使い方は<a href="#/faq">よくある質問</a>で紹介しています。</li>
+        <li>画像の処理はすべて利用者の端末の中で行います。運営者が画像を受け取ることはありません。</li>
+      </ol>
+
+      <h2>第4条（画像の権利と責任）</h2>
+      <ol>
+        <li>表画像と裏画像には、自分で権利を持っている画像か、権利者から許可を得た画像だけを使ってください。</li>
+        <li>本ツールで作った画像の内容と、それを投稿・共有した結果については、作った利用者が責任を負います。</li>
+        <li>本ツールで作った画像の権利は、元の画像の権利者にあります。</li>
+      </ol>
+
+      <h2>第5条（成人向けの画像）</h2>
+      <ol>
+        <li>成人向けの画像（ヌードや性的な表現を含む画像）は、次のすべてを守っている場合に限り、裏画像として埋め込むことができます。
+          <ol>
+            <li>利用者の国・地域の法律と、日本の法律に反しないこと。たとえば、日本の刑法でわいせつ物にあたる画像は埋め込めません。</li>
+            <li>Xの利用規約・ルールと、成人向けコンテンツやセンシティブなメディアに関するポリシーを守ること</li>
+            <li>Xに投稿するときは、そのポストに「センシティブな内容」のラベルを付けること</li>
+          </ol>
+        </li>
+        <li>表画像は、タイムラインで誰にでもそのまま見えます。表画像そのものも、Xのルールに従ってください。</li>
+      </ol>
+
+      <h2>第6条（禁止事項）</h2>
+      <p>本ツールを使って、次のことをしてはいけません。</p>
+      <ol>
+        <li>法律に反する画像を埋め込んだり、共有したりすること</li>
+        <li>児童（18歳未満）を性的に扱う画像を埋め込むこと。実在の人物かどうか、写真かイラストかを問いません</li>
+        <li>本人の同意なく撮影・公開された性的な画像や、実在の人物を性的に改変した画像を埋め込むこと</li>
+        <li>他人の著作権、肖像権、プライバシー、名誉などの権利を侵害すること</li>
+        <li>Xの利用規約・ルールで禁止されている画像（暴力的な表現、ヘイト、嫌がらせなど）を埋め込むこと</li>
+        <li>裏画像が外から見えないことを利用して、Xの審査や検出を逃れることを目的とする利用</li>
+        <li>ウイルスなど、他人の端末に害を与えるデータを埋め込むこと</li>
+        <li>本ツールを改変して、運営者が提供するものと誤解させる形で配布すること</li>
+        <li>Xやその他のサービスに過度な負荷をかける利用や、それらの運営を妨げる利用</li>
+        <li>その他、運営者が不適切と判断すること</li>
+      </ol>
+
+      <h2>第7条（合言葉）</h2>
+      <ol>
+        <li>合言葉は、クイズの答えや支援者限定の差分など、裏画像を見せる相手を作者が選ぶための機能です。合言葉を設定すると、裏画像は暗号化され、合言葉を知っている人だけが見られます。</li>
+        <li>合言葉を、秘密の連絡手段や、Xの審査・検出を逃れる手段として使ってはいけません。</li>
+        <li>合言葉は運営者には送られず、どこにも保存されません。忘れた場合でも、運営者が元に戻したり、教えたりすることはできません。</li>
+        <li>合言葉を設定しても、第5条と第6条はそのまま適用されます。見る人を限ったとしても、法律やXのルールに反する画像は埋め込めません。</li>
+      </ol>
+
+      <h2>第8条（拡張機能）</h2>
+      <ol>
+        <li>拡張機能は、x.com の画面の上にボタン、レンズを重ねて表示します。Xの表示内容そのものを変えることはありません。</li>
+        <li>拡張機能は、Xの画面に表示されている画像と、マウスを乗せた画像の元ファイルだけを取得します。ポストを自動で集めたり、巡回したりすることはありません。</li>
+        <li>Xの仕様が変わると、拡張機能が予告なく動かなくなったり、裏画像を読み取れなくなったりすることがあります。</li>
+        <li>拡張機能で見られる裏画像は、他の利用者が作ったものです。その内容について、運営者は責任を負いません。法律やXのルールに反すると思われる画像は、Xの報告機能で報告してください。</li>
+      </ol>
+
+      <h2>第9条（保証の否認）</h2>
+      <ol>
+        <li>本ツールは現状のまま提供します。不具合がないこと、特定の目的に合うこと、いつでも使えることは保証しません。</li>
+        <li>Xに投稿した画像が、変換されずにそのまま届くことは保証しません。Xが画像を変換すると、裏画像は読み取れなくなります。</li>
+      </ol>
+
+      <h2>第10条（責任の制限）</h2>
+      <ol>
+        <li>本ツールの利用によって利用者や第三者に損害が生じても、運営者は責任を負いません。ただし、運営者に故意または重大な過失がある場合は除きます。</li>
+        <li>利用者どうし、または利用者と第三者との間で争いが起きたときは、当事者の間で解決してください。</li>
+      </ol>
+
+      <h2>第11条（変更・中止）</h2>
+      <p>運営者は、予告なく本ツールの内容を変えたり、提供を中止・終了したりすることがあります。</p>
+
+      <h2>第12条（違反への対応）</h2>
+      <p>運営者は、本規約に反する利用を知ったとき、法令に基づく要請があれば、捜査機関などに協力することがあります。</p>
+
+      <h2>第13条（規約の変更）</h2>
+      <ol>
+        <li>運営者は、必要に応じて本規約を変更することがあります。</li>
+        <li>変更後の規約は、本ツールのサイトに掲載した時点から効力を持ちます。変更後も本ツールを利用した場合は、変更に同意したものとみなします。</li>
+      </ol>
+
+      <h2>第14条（準拠法）</h2>
+      <p>本規約は、日本の法律に従って解釈します。</p>
+
+      <h2>第15条（管轄）</h2>
+      <p>本ツールに関する争いは、千葉地方裁判所を第一審の専属的合意管轄裁判所とします。</p>
+
+      <h2>第16条（お問い合わせ）</h2>
+      <p>本規約や本ツールについてのお問い合わせは、運営者のXアカウント（<a href="https://x.com/vrchat_abc" target="_blank" rel="noopener">https://x.com/vrchat_abc</a>）にお願いします。</p>
+      <p>本規約やXのルールに反する使い方を見つけた場合は、Xの報告機能で報告するとともに、同じ窓口から運営者にもお知らせください。</p>
+
+      <p class="legal-date">制定日：2026年10月24日</p>
+    </section>
+
+    <!-- ============ Privacy ============ -->
+    <section class="screen legal mx-auto max-w-[45rem] pt-2 pb-16" data-screen="privacy">
+      <p>このプライバシーポリシーは、vrcalphabet（以下「運営者」）が提供する「X-Lens」のWebアプリ（https://x-lens.workers.dev/）とChrome拡張機能（以下、あわせて「本ツール」）での情報の扱いを定めるものです。</p>
+      <p>本ツールは非公式のツールです。X Corp.が提供・承認・支援するものではなく、X Corp.とは一切関係ありません。「X」は X Corp. の商標です。</p>
+
+      <h2>1. 基本方針</h2>
+      <p><strong>運営者は、利用者のデータを一切集めません</strong>。画像の埋め込み、読み取り、合言葉による暗号化と解除は、すべて利用者の端末の中で行います。運営者のサーバーに画像や合言葉を送ることはありません。アカウント登録、アクセス解析、広告もありません。</p>
+
+      <h2>2. Webアプリで扱う情報</h2>
+      <div class="legal-table">
+        <table>
+          <thead><tr><th>情報</th><th>扱い</th></tr></thead>
+          <tbody>
+            <tr><td>選択した画像</td><td>ブラウザ内で処理します。送信も保存もしません。ページを閉じると消えます</td></tr>
+            <tr><td>合言葉</td><td>画像の暗号化・解除にだけ使います。送信も保存もしません</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Webアプリを開くと、次の事業者に通信が発生します。このとき、IPアドレスやブラウザの種類などが各事業者に送られ、各事業者のプライバシーポリシーに従って扱われます。画像や合言葉は送られません。</p>
+      <ul>
+        <li><strong>Cloudflare, Inc.</strong>：Webアプリのファイル（HTML・JavaScript・画像）を配信しています。セキュリティなどのためにアクセス情報を処理することがあります（<a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare プライバシーポリシー</a>）</li>
+        <li><strong>Google LLC</strong>：Google Fonts のフォントを読み込みます（<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google プライバシーポリシー</a>）</li>
+      </ul>
+      <p>「Xに投稿」ボタンを押すと x.com が開きます。その先は X Corp. のプライバシーポリシーが適用されます。</p>
+
+      <h2>3. 拡張機能で扱う情報</h2>
+      <p>拡張機能が使う権限は次の4つだけです。</p>
+      <div class="legal-table">
+        <table>
+          <thead><tr><th>権限</th><th>使い道</th></tr></thead>
+          <tbody>
+            <tr><td>x.com、twitter.com での動作</td><td>画面右下のボタン、画像の枠、レンズを表示するため</td></tr>
+            <tr><td>pbs.twimg.com へのアクセス</td><td>Xの投稿画像を取得し、裏画像の有無を判定・復元するため</td></tr>
+            <tr><td>拡張機能のストレージ</td><td>合言葉を端末に保存するため</td></tr>
+            <tr><td>右クリックメニュー</td><td>Xの画像の右クリックメニューに「拡大画像をコピーする」を追加するため</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>読み取る情報</strong>：x.com のページから読むのは、投稿画像のURLと、その画像のポストIDだけです。ポストの本文、アカウント情報、DM、閲覧履歴は読み取りません。</p>
+      <p><strong>取得する画像</strong>：レンズモードがオンのときだけ、画面に表示された投稿画像をXのサーバー（pbs.twimg.com）から取得します。右クリックメニューで画像をコピーするときは、レンズモードに関係なく、その画像の元のファイルを取得します。取得した画像は端末の中でだけ処理し、運営者や第三者には送りません。</p>
+      <p><strong>コピーする画像</strong>：右クリックメニューで画像をコピーすると、元のサイズの画像（または復元した裏画像）を利用者のクリップボードに置きます。作成者がコピーを禁止した裏画像はコピーできません。コピーした画像がどこかに送られることはありません。</p>
+      <p><strong>端末に保存する情報</strong>：解除できた合言葉と、その画像のポストIDを、ブラウザの拡張機能用の保存領域に保存します。他の端末とは同期されず、運営者にも送られません。レンズモードのオン・オフやレンズの大きさは保存せず、ページを読み込み直すと元に戻ります。</p>
+
+      <h2>4. 第三者への提供</h2>
+      <p>運営者は利用者の情報を集めていないので、第三者に提供することはありません。</p>
+
+      <h2>5. 13歳未満の方</h2>
+      <p>本ツールは13歳未満の方を対象としていません。</p>
+
+      <h2>6. このポリシーの変更</h2>
+      <p>本ツールで扱う情報が変わるときは、このポリシーを更新し、本ツールのサイトでお知らせします。</p>
+
+      <h2>7. お問い合わせ</h2>
+      <p>このポリシーについてのお問い合わせは、運営者のXアカウント（<a href="https://x.com/vrchat_abc" target="_blank" rel="noopener">https://x.com/vrchat_abc</a>）にお願いします。</p>
+
+      <p class="legal-date">制定日：2026年10月24日</p>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="screen legal mx-auto max-w-[45rem] pt-2 pb-16" data-screen="faq">
+      <h2>X-Lens とは？</h2>
+      <p>Xに投稿する画像に、もう一枚の画像を隠せるツールです。レンズを重ねた人にだけ、隠された画像（「裏画像」といいます）が見えます。</p>
+      <p>合言葉機能を使って画像を作成すると、その合言葉を知っている人にだけ、裏画像が見えます。</p>
+
+      <h2>何に使えますか？</h2>
+      <ul>
+        <li><strong>ALT（代替テキスト）の代わり</strong>：今までALTに書いていた補足や裏話、おまけのネタを、文字ではなく画像として裏画像に入れられます</li>
+        <li><strong>ネタバレ防止</strong>：感想のネタバレ部分を裏画像にして、見たい人だけが覗く</li>
+        <li><strong>ビフォーアフター</strong>：線画と完成版、加工前と加工後、アバター改変の前後</li>
+        <li><strong>隠し要素</strong>：ふつうの画像に小さな仕掛けや作者のメッセージを隠す</li>
+        <li><strong>告知のチラ見せ</strong>：告知画像に次回作のヒントを仕込む</li>
+      </ul>
+      <p>合言葉機能を使うと、見せる相手を選べます。</p>
+      <ul>
+        <li><strong>謎解き企画（ARG）</strong>：別の場所で手に入れた合言葉で、次の手がかりが見える</li>
+        <li><strong>支援者限定の特典</strong>：FANBOX やメンバーシップの支援者に合言葉を伝えて、差分や壁紙を見せる</li>
+        <li><strong>イベント参加者限定</strong>：イベント会場で発表した合言葉で、参加者だけが記念画像を見られる</li>
+        <li><strong>内輪の楽しみ</strong>：友人どうしやサークル内の身内ネタ</li>
+      </ul>
+
+      <h2>なぜ合言葉の機能があるのですか？</h2>
+      <p>裏画像は、拡張機能を入れた人なら誰でも覗けます。「問題が解けた人にだけ」「差分は支援者にだけ」のように、見せる相手を作者が選べるようにするための機能です。仕組みはパスワード付きのzipファイルを渡すのと同じで、別のサービスを使わずに投稿の画像の中で完結します。法律や利用規約を免れる手段として使うことはできません。</p>
+
+      <h2>裏画像はどうやって見るのですか？</h2>
+      <p>Google Chrome に X-Lens の拡張機能を入れ、Xの画面右下のボタンでレンズモードをオンにします。X-Lens で作成された画像には右下にアイコンが付き、マウスを乗せると覗けます。保存した画像は、このサイトの「覗く」画面でも開けます。</p>
+      <p>なお、アイコンが紫色に光っている場合は合言葉が必要です。</p>
+
+      <h2>合言葉付きの画像を見るには？</h2>
+      <p>紫色に光っているアイコンが付いている画像が、合言葉付きの X-Lens 画像の目印です。画像にレンズを重ねてクリックすると、合言葉の入力欄が出ます。</p>
+
+      <h2>合言葉を忘れました</h2>
+      <p>合言葉はどこにも保存されないため、運営者にも元に戻せません。</p>
+
+      <h2>画像や合言葉はどこかに送られますか？</h2>
+      <p>送られません。画像と合言葉の処理はすべてお使いの端末の中で行います。詳しくは<a href="#/privacy">プライバシーポリシー</a>をご覧ください。</p>
+
+      <h2>workers.dev (Cloudflare Workers) で動いているので、裏で画像を保存しているのでは？</h2>
+      <p>保存していません。このサイトは、GitHub のリポジトリが更新されると Cloudflare が自動でビルドし、できあがった静的なファイル（HTML・JavaScript・CSSなど）を配信しているだけです。サーバー側で動くプログラムはないため、画像や合言葉を受け取る仕組みがそもそもありません。Cloudflare の無料の公開用アドレスを使っているだけです。</p>
+      <p>ブラウザの開発者ツール（F12）の「ネットワーク」タブを開いたまま画像を作れば、どこにも送信されていないことを確認できます。</p>
+
+      <h2>裏画像が読み取れません</h2>
+      <ul>
+        <li>Xへ投稿する際は、PCのブラウザから保存した画像をそのまま投稿してください。切り抜きや編集をすると読めなくなります</li>
+        <li>「覗く」画面では、ポストの画像をクリックして大きく表示してから保存した画像を開いてください。タイムラインの小さい画像からは読み取れません</li>
+        <li>Xの仕様が変わると読み取れなくなることがあります</li>
+      </ul>
+
+      <h2>成人向けの画像を入れてもいいですか？</h2>
+      <p>お住まいの国・地域の法律と日本の法律、Xの利用規約・ルールを守っている場合に限り入れられます。Xに投稿するときは、ポストに「センシティブな内容」の設定を付けてください。</p>
+
+      <h2>悪用を見つけました</h2>
+      <p>Xの報告機能で報告してください。あわせて、運営者のXアカウント（<a href="https://x.com/vrchat_abc" target="_blank" rel="noopener">@vrchat_abc</a>）にもお知らせいただけると助かります。</p>
+
+      <h2>X の公式ツールですか？</h2>
+      <p>いいえ。X-Lens は個人（vrcalphabet）が作った非公式ツールで、X Corp. とは関係ありません。</p>
+    </section>
+  </main>
+
+  <header class="order-first flex h-(--header-h) items-center justify-between px-(--gutter)">
+    <nav class="flex gap-1">
+      <a href="#/make" data-nav="make" class="rounded-full px-3.5 py-1.5 font-medium text-ink hover:bg-graphite/7 [&[aria-current]]:bg-graphite [&[aria-current]]:text-white">作る</a>
+      <a href="#/peek" data-nav="peek" class="rounded-full px-3.5 py-1.5 font-medium text-ink hover:bg-graphite/7 [&[aria-current]]:bg-graphite [&[aria-current]]:text-white">覗く</a>
+      <!-- TODO(仮): Chrome ウェブストアのURLに差し替える -->
+      <a href="#/faq" class="ext-link rounded-full px-3.5 py-1.5 bg-white font-medium text-ink shadow-[inset_0_0_0_0.0625rem_var(--color-mount)] hover:bg-graphite/7 max-narrow:hidden">拡張機能</a>
+    </nav>
+    <div class="order-first flex min-w-0 items-center gap-3.5">
+      <a class="inline-flex items-center gap-2.5 font-display text-[1.375rem] tracking-[0.02em] text-ink" href="#/">
+        <span class="loupe size-6" aria-hidden="true"></span>X-Lens
+      </a>
+      <h1 class="border-l-[0.0938rem] border-mount pl-3.5 text-md leading-[1.4] font-bold whitespace-nowrap outline-none" id="pageTitle" hidden></h1>
+    </div>
+  </header>
+
+  <footer class="mt-auto flex flex-wrap items-center gap-x-5 gap-y-1 px-(--gutter) py-5 text-sm text-ink-soft">
+    <a class="hover:text-ink hover:underline" href="#/faq">よくある質問</a>
+            <a class="hover:text-ink hover:underline" href="#/terms">利用規約</a>
+    <a class="hover:text-ink hover:underline" href="#/privacy">プライバシーポリシー</a>
+  </footer>
+
+  <dialog class="post-dialog" id="postDialog">
+    <div class="flex items-center gap-4">
+      <canvas class="size-24 flex-none rounded-lg bg-glow shadow-[0_0_0_0.0625rem_var(--color-mount)]" id="postThumb" width="96" height="96" aria-hidden="true"></canvas>
+      <div>
+        <h2 class="text-lg leading-[1.4] font-bold" id="postDialogTitle">保存しました</h2>
+        <p class="mt-1 text-sm leading-[1.7] text-ink-soft" id="postDialogLede"></p>
+      </div>
+    </div>
+    <ul class="mt-5 grid list-disc gap-2.5 rounded-[0.625rem] bg-glow py-4 pr-4 pl-[2.125rem] text-sm leading-[1.7] text-ink-soft shadow-[inset_0_0_0_0.0625rem_var(--color-mount)] [&_strong]:block [&_strong]:text-ink">
+      <li><strong>PCのブラウザから投稿してください。</strong>PCブラウザ以外からの投稿は未検証です。</li>
+      <li><strong>画像を切り抜いたり編集したりしないでください。</strong>1ピクセルでも変わると、隠した画像を読めなくなります。</li>
+    </ul>
+    <div class="mt-5 flex flex-row-reverse justify-start gap-2.5">
+      <a class="btn btn-primary max-narrow:flex-1" id="postToX" href="https://x.com/compose/post" target="_blank" rel="noopener">Xに投稿</a>
+      <button type="button" class="btn btn-quiet max-narrow:flex-1" id="postClose">閉じる</button>
+    </div>
+  </dialog>
+
+  <dialog class="post-dialog" id="peekDialog">
+    <div class="flex items-center gap-4">
+      <canvas class="size-24 flex-none rounded-lg bg-glow shadow-[0_0_0_0.0625rem_var(--color-mount)]" id="peekThumb" width="96" height="96" aria-hidden="true"></canvas>
+      <div>
+        <h2 class="text-lg leading-[1.4] font-bold" id="peekDialogTitle">隠した画像が見つかりません</h2>
+        <p class="mt-1 text-sm leading-[1.7] text-ink-soft" id="peekDialogLede"></p>
+      </div>
+    </div>
+    <ul class="mt-5 grid list-disc gap-2.5 rounded-[0.625rem] bg-glow py-4 pr-4 pl-[2.125rem] text-sm leading-[1.7] text-ink-soft shadow-[inset_0_0_0_0.0625rem_var(--color-mount)] [&_strong]:block [&_strong]:text-ink">
+      <li><strong>画像は大きく表示してから保存してください。</strong>ポストの画像をクリックして大きく表示してから、右クリック →「画像をコピー」します。<br />タイムラインに表示される縮小された画像からは読み取れません。</li>
+      <li><strong>スクショや、切り抜き・圧縮した画像からは読み取れません。</strong>保存した画像をそのまま開いてください。</li>
+    </ul>
+    <div class="mt-5 flex flex-row-reverse justify-start gap-2.5">
+      <button type="button" class="btn btn-primary max-narrow:flex-1" id="peekDialogOpen">別の画像を開く</button>
+      <button type="button" class="btn btn-quiet max-narrow:flex-1" id="peekDialogClose">閉じる</button>
+    </div>
+  </dialog>
+
+  <dialog class="post-dialog" id="unlockDialog">
+    <form method="dialog" id="unlockForm">
+      <h2 class="text-lg leading-[1.4] font-bold">合言葉で保護されています</h2>
+      <p class="mt-1 text-sm leading-[1.7] text-ink-soft">隠した画像を見るには、作成者から伝えられた合言葉を入力してください。</p>
+      <input type="text" id="unlockInput" autocomplete="off" spellcheck="false" required
+        class="mt-4 w-full rounded-lg bg-white px-3.5 py-2.5 shadow-[inset_0_0_0_0.0938rem_var(--color-mount)] outline-none focus-visible:shadow-[inset_0_0_0_0.125rem_var(--color-coat)]" />
+      <p class="mt-2 text-sm font-bold text-[#c0262d]" id="unlockError" hidden>合言葉が違います</p>
+      <div class="mt-5 flex flex-row-reverse justify-start gap-2.5">
+        <button type="submit" class="btn btn-primary max-narrow:flex-1" id="unlockOk">解除</button>
+        <button type="button" class="btn btn-quiet max-narrow:flex-1" id="unlockCancel">キャンセル</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="busy" id="busy" hidden><span>処理中</span></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
